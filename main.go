@@ -19,6 +19,7 @@ type Page struct {
 func main() {
 	http.HandleFunc("/", serveIndex)
 	http.HandleFunc("/file/show", serveMarkdown)
+	http.HandleFunc("/assets/", serveAssets)
 	http.ListenAndServe(":3000", nil)
 }
 
@@ -48,14 +49,22 @@ func serveMarkdown(w http.ResponseWriter, r *http.Request) {
 
 	log.Println(filename, "requested")
 
-	s, _ := loadStylesheet("assets/github-markdown.css")
-
 	p, _ := loadMarkdownFile(filename)
 
-	//fmt.Fprintf(w, "<head><link href='%s' rel='stylesheet' type='text/css'></head>", s)
-	fmt.Fprintf(w, "<head><style type='text/css'>%s</style></head>", s)
+	fmt.Fprintf(w, "<head><link href='%s' rel='stylesheet' type='text/css'></head>", "/assets/github-markdown.css")
+	//fmt.Fprintf(w, "<head><>%s<></head>", "assets/github-markdown.css")
 
 	fmt.Fprintf(w, "<a href='/'>Back to Index</a><h1>%s</h1><div class='markdown-body'>%s</div>", p.Title, blackfriday.MarkdownCommon(p.Body))
+}
+
+func serveAssets(w http.ResponseWriter, r *http.Request) {
+	log.Println("serveAssets request")
+
+	asset := r.URL.Path[1:]
+
+	log.Println("Asset:", asset, "requested")
+
+	http.ServeFile(w, r, asset)
 }
 
 func loadMarkdownFile(filename string) (*Page, error) {
@@ -65,12 +74,4 @@ func loadMarkdownFile(filename string) (*Page, error) {
 		return nil, err
 	}
 	return &Page{Title: filename, Body: body}, nil
-}
-
-func loadStylesheet(filename string) ([]byte, error) {
-	stylesheet, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return []byte(""), err
-	}
-	return stylesheet, nil
 }
