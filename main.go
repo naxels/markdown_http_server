@@ -20,7 +20,7 @@ func main() {
 	http.HandleFunc("/", serveIndex)
 	http.HandleFunc("/file/show", serveMarkdown)
 	http.HandleFunc("/assets/", serveAssets)
-	http.ListenAndServe(":3000", nil)
+	http.ListenAndServe(":8080", nil)
 }
 
 func serveIndex(w http.ResponseWriter, r *http.Request) {
