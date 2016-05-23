@@ -1,6 +1,6 @@
 ## Markdown HTTP Server
 
-Go HTTP server that serves Markdown (.md) files from the directory the server is run
+Go HTTP server that serves Markdown (.md) files
 
 To get the source run:
 ```

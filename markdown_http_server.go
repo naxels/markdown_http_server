@@ -1,10 +1,12 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 
 	"github.com/russross/blackfriday"
@@ -16,17 +18,36 @@ type Page struct {
 	Body  []byte
 }
 
+var (
+	httpPort = flag.String("p", "8080", "web port to listen to")
+	fileDir  = flag.String("f", ".", "base directory to start server from")
+)
+
 func main() {
+	flag.Parse()
+
+	if *httpPort == "" {
+		fmt.Fprintln(os.Stderr, "require a web port")
+		flag.Usage()
+		os.Exit(1)
+	}
+
+	if *fileDir == "" {
+		fmt.Fprintln(os.Stderr, "require a folder")
+		flag.Usage()
+		os.Exit(1)
+	}
+
 	http.HandleFunc("/", serveIndex)
 	http.HandleFunc("/file/show", serveMarkdown)
 	http.HandleFunc("/assets/", serveAssets)
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":"+*httpPort, nil)
 }
 
 func serveIndex(w http.ResponseWriter, r *http.Request) {
 	log.Println("index request")
 
-	files, _ := filepath.Glob("*.md")
+	files, _ := filepath.Glob(filepath.Join(*fileDir, "*.md"))
 
 	fmt.Fprintf(w, "<h1>%s</h1>", "Index")
 
